@@ -12,7 +12,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterator, Optional
 
-# ------------------------- КОНФИГ -------------------------
 ENABLE_DB_SYNC = True
 DB_DSN = os.environ.get(
     "DB_DSN",
@@ -29,7 +28,6 @@ except Exception:
     pass
 
 
-# ------------------------- СТАТУСЫ -------------------------
 class FileStatus:
     NEW = "new"
     UNCHANGED = "unchanged"
@@ -46,7 +44,6 @@ class FileStatus:
     }
 
 
-# ------------------------- МОДЕЛЬ -------------------------
 @dataclass
 class FileRecord:
     """
@@ -71,7 +68,7 @@ class FileRecord:
     mime_type: Optional[str]
     created_at: datetime
     modified_at: datetime
-    status: str = FileStatus.NEW          # <-- статус как полноценное поле
+    status: str = FileStatus.NEW      
     scanned_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     content: Optional[str] = None
 
@@ -114,7 +111,6 @@ class FileRecord:
         }
 
 
-# ------------------------- ХРАНИЛИЩА -------------------------
 class ConsoleStorage:
     def save(self, record: FileRecord) -> None:
         created = record.created_at.astimezone().strftime("%Y-%m-%d %H:%M:%S")
@@ -123,7 +119,7 @@ class ConsoleStorage:
 
         print(
             f"[{status_ru}] {record.name}\n"
-            f"    status:      {record.status}\n"        # <-- статус как поле
+            f"    status:      {record.status}\n"       
             f"    путь:        {record.path}\n"
             f"    размер:      {record.size_bytes} B\n"
             f"    sha256:      {record.sha256_hash[:16]}...\n"
@@ -160,14 +156,13 @@ class DatabaseStorage:
         )
 
     def close(self) -> None:
-        self.conn.commit()   # без commit данные в базу не попадут
+        self.conn.commit()  
         self.conn.close()
 
 
 storage = DatabaseStorage() if ENABLE_DB_SYNC else ConsoleStorage()
 
 
-# ------------------------- УТИЛИТЫ -------------------------
 def compute_sha256(path: Path) -> str:
     hasher = hashlib.sha256()
     with path.open("rb") as f:
@@ -207,7 +202,6 @@ def build_record(path: Path) -> Optional[FileRecord]:
         return None
 
 
-# ------------------------- СНИМОК -------------------------
 def load_snapshot() -> dict[str, str]:
     if not SNAPSHOT_FILE.exists():
         return {}
@@ -227,7 +221,6 @@ def save_snapshot(records: list[FileRecord]) -> None:
     )
 
 
-# ------------------------- СКАНЕР -------------------------
 def scan_directory(root: Path) -> Iterator[FileRecord]:
     for path in root.rglob("*"):
         if not path.is_file():
@@ -237,7 +230,6 @@ def scan_directory(root: Path) -> Iterator[FileRecord]:
             yield record
 
 
-# ------------------------- ОСНОВНАЯ ЛОГИКА -------------------------
 def run_scan(root: Path) -> list[FileRecord]:
     previous = load_snapshot()
     seen_paths: set[str] = set()
