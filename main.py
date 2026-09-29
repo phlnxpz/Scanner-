@@ -46,20 +46,6 @@ class FileStatus:
 
 @dataclass
 class FileRecord:
-    """
-    Соответствие полей таблице files в PostgreSQL:
-        path        TEXT          NOT NULL
-        name        VARCHAR(255)  NOT NULL
-        extension   VARCHAR(32)
-        size_bytes  BIGINT        NOT NULL
-        sha256_hash CHAR(64)      NOT NULL
-        mime_type   VARCHAR(128)
-        created_at  TIMESTAMPTZ   NOT NULL
-        modified_at TIMESTAMPTZ   NOT NULL
-        scanned_at  TIMESTAMPTZ   NOT NULL DEFAULT now()
-        content     TEXT
-        status      VARCHAR(16)   NOT NULL   -- new / unchanged / modified / deleted
-    """
     path: str
     name: str
     extension: str
@@ -79,7 +65,6 @@ class FileRecord:
         return d
 
     def to_db_tuple(self) -> tuple:
-        """Порядок ровно под INSERT INTO files (...) VALUES (...)."""
         return (
             self.path,
             self.name,
@@ -95,7 +80,6 @@ class FileRecord:
         )
 
     def to_row(self) -> dict:
-        """Удобно для psycopg (dict → INSERT ... %(field)s) и для логов."""
         return {
             "path": self.path,
             "name": self.name,
@@ -129,31 +113,12 @@ class ConsoleStorage:
 
 
 class DatabaseStorage:
-    """Заготовка. Сюда придёт INSERT с полем status."""
     def __init__(self) -> None:
         self.conn = psycopg.connect(DB_DSN)
 
     def save(self, record: FileRecord) -> None:
         row = record.to_row()
-        self.conn.execute(
-            """
-            INSERT INTO files
-                (path, name, extension, size_bytes, sha256_hash, mime_type,
-                 created_at, modified_at, scanned_at, content, status)
-            VALUES
-                (%(path)s, %(name)s, %(extension)s, %(size_bytes)s, %(sha256_hash)s,
-                 %(mime_type)s, %(created_at)s, %(modified_at)s, %(scanned_at)s,
-                 %(content)s, %(status)s)
-            ON CONFLICT (path) DO UPDATE SET
-                sha256_hash = EXCLUDED.sha256_hash,
-                size_bytes  = EXCLUDED.size_bytes,
-                modified_at = EXCLUDED.modified_at,
-                scanned_at  = EXCLUDED.scanned_at,
-                content     = EXCLUDED.content,
-                status      = EXCLUDED.status
-            """,
-            row,
-        )
+        self.conn.execute(row)
 
     def close(self) -> None:
         self.conn.commit()  
