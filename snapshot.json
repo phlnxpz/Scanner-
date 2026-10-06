@@ -1,0 +1,67 @@
+[
+  {
+    "path": "C:\\Test\\Folder1\\data.csv",
+    "name": "data.csv",
+    "extension": ".csv",
+    "size_bytes": 40,
+    "sha256_hash": "b8bcdbd1aa0e7bd501e6adbf23d30160a1a3ca9da47c35282b04c118bf447be7",
+    "created_at": "2026-10-06T12:27:55.373822+00:00",
+    "modified_at": "2026-10-06T12:27:55.374823+00:00",
+    "status": "unchanged",
+    "scanned_at": "2026-10-06T12:31:18.283629+00:00",
+    "content": "id;name;price\n1;Laptop;1000\n2;Mouse;25",
+    "md5_hash": "be2e062b14ba05e6d2ac029d72ab3ac5"
+  },
+  {
+    "path": "C:\\Test\\Folder1\\document1.txt",
+    "name": "document1.txt",
+    "extension": ".txt",
+    "size_bytes": 146,
+    "sha256_hash": "57d58e0044dae1ba0996844b7230c7c6a04c0f0f63329a48f6a1a474deee9628",
+    "created_at": "2026-10-06T12:27:55.373822+00:00",
+    "modified_at": "2026-10-06T12:27:55.373822+00:00",
+    "status": "unchanged",
+    "scanned_at": "2026-10-06T12:31:18.298929+00:00",
+    "content": "Это тестовый документ для проверки поиска дубликатов.\r\nСодержимое 100% совпадает.",
+    "md5_hash": "8fb87ae326488b6d665d733e6891dc93"
+  },
+  {
+    "path": "C:\\Test\\Folder2\\copy_of_document1.txt",
+    "name": "copy_of_document1.txt",
+    "extension": ".txt",
+    "size_bytes": 146,
+    "sha256_hash": "57d58e0044dae1ba0996844b7230c7c6a04c0f0f63329a48f6a1a474deee9628",
+    "created_at": "2026-10-06T12:27:55.373822+00:00",
+    "modified_at": "2026-10-06T12:27:55.373822+00:00",
+    "status": "unchanged",
+    "scanned_at": "2026-10-06T12:31:18.300386+00:00",
+    "content": "Это тестовый документ для проверки поиска дубликатов.\r\nСодержимое 100% совпадает.",
+    "md5_hash": "8fb87ae326488b6d665d733e6891dc93"
+  },
+  {
+    "path": "C:\\Test\\Folder2\\unique_note.txt",
+    "name": "unique_note.txt",
+    "extension": ".txt",
+    "size_bytes": 83,
+    "sha256_hash": "aa03c53fcaf79c76a4e9c43de8ff8ab862fb71c29aeef17e77bac12c3f92a591",
+    "created_at": "2026-10-06T12:27:55.373822+00:00",
+    "modified_at": "2026-10-06T12:27:55.373822+00:00",
+    "status": "unchanged",
+    "scanned_at": "2026-10-06T12:31:18.301477+00:00",
+    "content": "Совершенно другой текст, которого больше нет.",
+    "md5_hash": "dd86508d576e6309780a4d12c5a72da6"
+  },
+  {
+    "path": "C:\\Test\\Folder1\\SubFolder\\deep_file.log",
+    "name": "deep_file.log",
+    "extension": ".log",
+    "size_bytes": 45,
+    "sha256_hash": "ce7a8fb53e67ce98ec33c504bf254f8ed81569a5333ef4fd599ee58ead9d9de4",
+    "created_at": "2026-10-06T12:27:55.373822+00:00",
+    "modified_at": "2026-10-06T12:27:55.373822+00:00",
+    "status": "unchanged",
+    "scanned_at": "2026-10-06T12:31:18.302788+00:00",
+    "content": "2026-10-05 LOG: Everything operates normally.",
+    "md5_hash": "f3c042fd1366edb77ba4a2bf2b1ce9f4"
+  }
+]
