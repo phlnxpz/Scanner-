@@ -1,5 +1,5 @@
 # main.py
-from __future__ import annotations  # специальная штука: позволяет писать типы "как строки", чтобы не было ошибок с порядком объявления классов
+from __future__ import annotations  # позволяет писать типы "как строки", чтобы не было ошибок с порядком объявления классов
 
 import csv  # библиотека для чтения CSV-файлов (таблички с запятыми)
 import hashlib  # библиотека для подсчёта хэша MD5
@@ -14,36 +14,36 @@ from datetime import datetime, timezone  # работа с датами и вр�
 from pathlib import Path  # удобная работа с путями к файлам
 from typing import Iterator, Optional  # подсказки для типов: "или значение, или None", "эта функция отдаёт значения по одному"
 
-import chardet  # угадывает кодировку текстового файла (utf-8, windows-1251 и т.д.)
-import pymupdf as fitz  # PyMuPDF: вытаскивает текст из PDF (новое имя модуля, fitz - старое)
+import chardet  # угадывает кодировку текстового файла
+import pymupdf as fitz  # PyMuPDF: вытаскивает текст из PDF 
 import psycopg2  # драйвер для подключения к PostgreSQL
 import py7zr  # чтение 7z-архивов
 import rarfile  # чтение rar-архивов
 import yaml  # чтение YAML-файлов
 from bs4 import BeautifulSoup  # вытаскивает текст из HTML
-from docx import Document  # читает .docx (Word)
+from docx import Document  # читает .docx
 from hachoir.metadata import extractMetadata  # универсальный "вытаскиватель" метаданных (если формат незнакомый)
 from hachoir.parser import createParser  # создаёт парсер для hachoir (для бинарных файлов)
-from mutagen import File as MutagenFile  # читает теги из аудио (mp3, flac и т.д.)
+from mutagen import File as MutagenFile  # читает теги из аудио
 from odf import teletype  # вытаскивает текст из ODF-документов
 from odf.opendocument import load as load_odf  # открывает ODF-документы
-from openpyxl import load_workbook  # читает .xlsx (Excel)
-from PIL import Image  # читает картинки (jpg, png и т.д.)
-from pptx import Presentation  # читает .pptx (PowerPoint)
+from openpyxl import load_workbook  # читает .xlsx
+from PIL import Image  # читает картинки
+from pptx import Presentation  # читает .pptx
 
 # ------------------------- КОНФИГ -------------------------
 # Путь сканирования: приоритет - аргумент командной строки, потом переменная окружения,
-# потом константа (на случай ручного запуска без GUI).
+# потом константа (на случай ручного запуска без interf).
 _cli_root = None
 if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):  # первый аргумент - не флаг, значит это путь
     _cli_root = sys.argv[1]  # запоминаем путь из командной строки
 
-_env_root = os.environ.get("ROOT_PATH_OVERRIDE")  # путь, который мог передать GUI через переменную окружения
+_env_root = os.environ.get("ROOT_PATH_OVERRIDE")  # путь, который мог передать interf через переменную окружения
 
 ROOT_PATH = _cli_root or _env_root or r"E:\MAX_files"  # итоговый путь: аргумент > env > значение по умолчанию
 
 ENABLE_DB_SYNC = True  # False = писать результаты скана в терминал; True = писать результаты скана в PostgreSQL
-if os.environ.get("ENABLE_DB_SYNC_OVERRIDE"):  # GUI может переопределить режим через переменную окружения
+if os.environ.get("ENABLE_DB_SYNC_OVERRIDE"):  # interf может переопределить режим через переменную окружения
     ENABLE_DB_SYNC = os.environ["ENABLE_DB_SYNC_OVERRIDE"] == "1"  # "1" -> True, иначе False
 
 DB_DSN = os.environ.get(  # строка подключения к БД: из переменной окружения DB_DSN или значение по умолчанию
@@ -105,7 +105,7 @@ class FileRecord:  # одна запись о файле - всё, что про
     """
     path: str  # полный путь к файлу
     name: str  # имя файла с расширением
-    extension: str  # расширение в нижнем регистре (например, .txt)
+    extension: str  # расширение в нижнем регистре
     size_bytes: int  # размер файла в байтах
     created_at: datetime  # дата создания файла
     modified_at: datetime  # дата последнего изменения файла
@@ -116,7 +116,7 @@ class FileRecord:  # одна запись о файле - всё, что про
     file_id: Optional[int] = None  # id из таблицы files (появляется только после записи в БД)
     change_count: Optional[int] = None  # сколько раз менялся файл (счётчик из БД)
 
-    def to_jsonable(self) -> dict:  # версия записи для сохранения в JSON (snapshot.json)
+    def to_jsonable(self) -> dict:  # версия записи для сохранения в JSON
         d = asdict(self)  # превращаем запись в обычный словарь
         for k in ("created_at", "modified_at", "scanned_at"):  # даты в JSON не сохранить напрямую - переводим их в текст
             d[k] = d[k].isoformat()  # формат ISO 8601, например 2026-10-05T20:00:00+00:00
@@ -336,7 +336,7 @@ storage = DatabaseStorage() if ENABLE_DB_SYNC else ConsoleStorage()  # выби�
 
 # ------------------------- УТИЛИТЫ -------------------------
 def compute_md5(path: Path) -> str:
-    hasher = hashlib.md5()  # алгоритм MD5 (32 символа)
+    hasher = hashlib.md5()  # алгоритм MD5
     with path.open("rb") as f:  # открываем файл на чтение в бинарном режиме
         for chunk in iter(lambda: f.read(HASH_CHUNK_SIZE), b""):  # читаем кусками
             hasher.update(chunk)  # добавляем в хэш
@@ -363,7 +363,7 @@ def convert_office_file(path: Path) -> Optional[Path]:
             app.DisplayAlerts = 0  # не задавать вопросов
             try:
                 doc = app.Documents.Open(str(path))  # открываем старый документ
-                doc.SaveAs2(str(target), 16)  # сохраняем как .docx (16 = wdFormatDocumentDefault)
+                doc.SaveAs2(str(target), 16)  # сохраняем как .docx
                 doc.Close(False)  # закрываем документ, правки не сохраняем
             finally:
                 app.Quit()  # закрываем Word в любом случае
@@ -373,7 +373,7 @@ def convert_office_file(path: Path) -> Optional[Path]:
             app.DisplayAlerts = False
             try:
                 wb = app.Workbooks.Open(str(path))  # открываем старую книгу
-                wb.SaveAs(str(target), 51)  # сохраняем как .xlsx (51 = xlOpenXMLWorkbook)
+                wb.SaveAs(str(target), 51)  # сохраняем как .xlsx
                 wb.Close(False)  # закрываем книгу без сохранения
             finally:
                 app.Quit()  # закрываем Excel в любом случае
@@ -383,9 +383,8 @@ def convert_office_file(path: Path) -> Optional[Path]:
         print(f"[CONVERT-SKIP] {path.name}: {type(e).__name__}: {e}")
         return None
 
-
+ #Достаёт текст/метаданные из файла. None - если не умеем или слишком большой
 def read_text_content(path: Path, size_bytes: int) -> Optional[str]:
-    """Достаёт текст/метаданные из файла. None - если не умеем или слишком большой."""
     if size_bytes > MAX_CONTENT_SIZE:  # если файл больше 5 МБ
         return None  # не трогаем его - слишком тяжёлый
 
@@ -607,7 +606,7 @@ def run_scan(root: Path) -> list[FileRecord]:  # основной проход
 
 def main() -> None:  # главная функция
     root = Path(ROOT_PATH)  # папка для сканирования
-    print(f"[СТАРТ] Сканирую папку: {root}")  # видно в консоли и в статусе GUI
+    print(f"[СТАРТ] Сканирую папку: {root}")  # видно в консоли и в статусе interf
     print(f"[СНИМОК] {SNAPSHOT_FILE}")  # какой файл снимка используется
 
     if not root.exists():  # если папки нет
